@@ -1,107 +1,111 @@
 package com.enlighten.gaanadownloader;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import android.app.Activity;
-import android.os.AsyncTask;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.os.Bundle;
-import android.os.Environment;
+import android.support.v4.app.NotificationCompat;
 import android.view.Menu;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
-public class MainActivity extends Activity {
-	TextView statusTextView;
-	AsyncTask<String, Void, Void> songLoader = new AsyncTask<String, Void, Void>() {
-		protected void onPreExecute() {
-			statusTextView.setText("Downloading song");
-		};
+import com.enlighten.gaanadownloader.tasks.Interceptor;
+import com.enlighten.gaanadownloader.tasks.PrerequisiteChecker;
 
-		@Override
-		protected Void doInBackground(String... params) {
-			String url = params[0];
-			URL downloadURL;
-			InputStream downloadStream = null;
-			FileOutputStream fileWriter = null;
-
-			try {
-				System.out.println("download url " + url);
-				downloadURL = new URL(url);
-				downloadStream = downloadURL.openStream();
-				File storage = Environment.getExternalStorageDirectory();
-
-				File downloadedFile = new File(storage.getAbsolutePath() + "/"
-						+ "testsong");
-				if (downloadedFile.exists()) {
-					downloadedFile.delete();
-				}
-				downloadedFile.createNewFile();
-				fileWriter = new FileOutputStream(downloadedFile);
-
-				int c;
-				while ((c = downloadStream.read()) != -1) {
-					fileWriter.write(c);
-				}
-
-			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} finally {
-				try {
-					if (null != downloadStream) {
-						downloadStream.close();
-					}
-					if (null != fileWriter) {
-						fileWriter.close();
-					}
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-
-			return null;
-		}
-
-		protected void onPostExecute(Void result) {
-
-			Toast.makeText(MainActivity.this, "song downloaded",
-					Toast.LENGTH_LONG).show();
-			statusTextView.setText("Song downloaded");
-		};
-
-	};
+public class MainActivity extends Activity implements OnClickListener {
+	private TextView infoTextView;
+	private Button startInterceptingButton;
+	private PrerequisiteChecker prerequisiteChecker;
+	private Interceptor interceptor;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		statusTextView = (TextView) findViewById(R.id.status_text);
-
-		String url = "http://streams.gaana.com/mp3/64/34/209034/2470383.mp3?streamauth=1401732258_f78b68f30c80e2f49e53028946d6e7c3";
-
-		songLoader.execute(url);
+		infoTextView = (TextView) findViewById(R.id.info_text);
+		startInterceptingButton = (Button) findViewById(R.id.start_intercepting);
+		startInterceptingButton.setOnClickListener(this);
+		prerequisiteChecker = new PrerequisiteChecker(this);
+		interceptor = new Interceptor(this);
 	}
 
-	
-	
+	@Override
+	protected void onStart() {
+		super.onStart();
+		prerequisiteChecker.execute((Void) null);
+
+	}
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
-	
-	protected void initView()
-	{
-		
+
+	/**
+	 * Called by {@link PrerequisiteChecker} when it is done checking
+	 * prerequisites and found everything needed
+	 */
+	public void initView() {
+		startInterceptingButton.setEnabled(true);
+
+	}
+
+	/**
+	 * Called by {@link Interceptor} when it is done setting up socat and
+	 * iptables to intercept gaana app's traffic
+	 */
+
+	public void interceptSetupCompleted() {
+		Notification notification;
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(
+				getApplicationContext())
+				.setSmallIcon(android.R.drawable.presence_online)
+				.setTicker("Started Intercepting")
+				.setContentTitle("Intercepting...")
+				.setDefaults(Notification.DEFAULT_ALL).setAutoCancel(true);
+
+		notification = builder.build();
+		((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).notify(
+				Constants.STARTED_INTERCEPTING_NOTIFICAITON, notification);
+
+	}
+
+	/**
+	 * Called by {@link Interceptor} when socat command terminated
+	 */
+	public void stoppedIntercepting() {
+		Notification notification;
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(
+				getApplicationContext())
+				.setSmallIcon(android.R.drawable.presence_online)
+				.setTicker(
+						"Stopped Intercepting because got url or socat timed out")
+				.setContentTitle("Intercepting...")
+				.setDefaults(Notification.DEFAULT_ALL).setAutoCancel(true);
+
+		notification = builder.build();
+		((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).notify(
+				Constants.STARTED_INTERCEPTING_NOTIFICAITON, notification);
+	}
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.start_intercepting:
+			executeInterceptingTask();
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	private void executeInterceptingTask() {
+		interceptor.execute((Void) null);
+
 	}
 
 }

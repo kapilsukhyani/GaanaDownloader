@@ -5,6 +5,9 @@ import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.widget.Toast;
+
+import com.stericson.RootTools.RootTools;
 
 public class Dialogs {
 
@@ -28,6 +31,41 @@ public class Dialogs {
 			final Activity context) {
 		showApplcationFinishAlertDialog(context,
 				"Either root is not available or not granted");
+	}
+
+	public static void showBusyboxNotAvailableDialog(final Activity context) {
+		new Builder(context)
+				.setTitle("Busybox is required to run this app.")
+				.setMessage("Do you want to install it?")
+				.setCancelable(false)
+				.setPositiveButton("Install busybox",
+						new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick(DialogInterface dialog,
+									int which) {
+								Toast.makeText(
+										context,
+										"Remember to run the busybox installer app after downloading it",
+										Toast.LENGTH_LONG).show();
+								dialog.dismiss();
+								// install the binary as it is not available
+								RootTools.offerBusyBox(context);
+								context.finish();
+							}
+						})
+				.setNegativeButton("No", new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+						Toast.makeText(
+								context,
+								"Closing app as prerequisites are not available",
+								Toast.LENGTH_LONG).show();
+						context.finish();
+					}
+				}).create().show();
 	}
 
 	public static void showApplcationFinishAlertDialog(final Activity context,

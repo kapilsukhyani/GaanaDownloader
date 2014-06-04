@@ -15,17 +15,20 @@
         android:paddingTop="@dimen/activity_vertical_margin" >
 
         <TextView
-            android:id="@+id/status_text"
+            android:id="@+id/info_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:text="@string/info"
-            android:layout_marginBottom="20dip"/>
+            android:layout_marginBottom="20dip"
+            android:text="@string/info" />
 
         <Button
+            android:id="@+id/start_intercepting"
             android:layout_width="fill_parent"
             android:layout_height="60dip"
-            android:layout_below="@id/status_text"
+            android:layout_below="@id/info_text"
+            android:background="@android:drawable/alert_light_frame"
+            android:enabled="false"
             android:text="@string/start_intercepting" />
     </RelativeLayout>
 

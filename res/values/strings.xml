@@ -7,8 +7,8 @@
     <string name="info">To start downloading songs for free from gaana.com songs database, follow these steps:\n
         1. Run Gaana android app.\n
         2. Choose a song to be dowloaded but do not start playing it yet.\n
-        3. Come back here in this app and click on "Start Intercepting" button.\n
-        4. Go back to Gaana android app and start playing the song you need to download.\n
+        3. Come back in Gaana Downloader app and click on "Start Intercepting" button.\n
+        4. Go back to Gaana android app without pressing back and start playing the song you need to download.\n
         5. Just wait for this app to show a download complete notification.\n
         6. Play and enjoy your song.\n</string>
     <string name="start_intercepting">Start Intercepting</string>
