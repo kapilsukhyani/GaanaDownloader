@@ -14,30 +14,31 @@ import android.os.Environment;
 
 import com.enlighten.gaanadownloader.AppLog;
 import com.enlighten.gaanadownloader.Constants;
+import com.enlighten.gaanadownloader.Dialogs;
 
-public class SongDownloader extends AsyncTask<String, Void, Void> {
+public class SongDownloader extends AsyncTask<String, Void, String> {
 	private Activity context;
 	private static final String TAG = "SongDownloader";
 
-	SongDownloader(Activity context) {
+	public SongDownloader(Activity context) {
 		this.context = context;
 	}
 
 	protected void onPreExecute() {
-
+		Dialogs.showNotification(context, "Got song url",
+				"Downloading your song", "Downloading your song",
+				android.R.drawable.arrow_down_float);
 	};
 
 	@Override
-	protected Void doInBackground(String... params) {
+	protected String doInBackground(String... params) {
 		String url = params[0];
-		downloadAndSaveSong(url);
-
-		return null;
+		return downloadAndSaveSong(url);
 	}
 
-	private void downloadAndSaveSong(String url) {
+	private String downloadAndSaveSong(String url) {
 		AppLog.logDebug(TAG, "Song url " + url);
-		saveSongToExternalStorage(getSongInputStream(url));
+		return saveSongToExternalStorage(getSongInputStream(url));
 
 	}
 
@@ -60,7 +61,7 @@ public class SongDownloader extends AsyncTask<String, Void, Void> {
 
 	}
 
-	private void saveSongToExternalStorage(InputStream downloadStream) {
+	private String saveSongToExternalStorage(InputStream downloadStream) {
 
 		FileOutputStream fileWriter = null;
 		File storage = Environment.getExternalStorageDirectory();
@@ -74,11 +75,14 @@ public class SongDownloader extends AsyncTask<String, Void, Void> {
 		try {
 			downloadedFile.createNewFile();
 			fileWriter = new FileOutputStream(downloadedFile);
+			byte[] buffer = new byte[4096];
 
 			int c;
-			while ((c = downloadStream.read()) != -1) {
-				fileWriter.write(c);
+			while ((c = downloadStream.read(buffer)) != -1) {
+				fileWriter.write(buffer);
 			}
+
+			return downloadedFile.getAbsolutePath();
 		} catch (IOException e) {
 			AppLog.logDebug(TAG,
 					"Something went wrong while saving downloaded song");
@@ -103,10 +107,22 @@ public class SongDownloader extends AsyncTask<String, Void, Void> {
 
 		}
 
+		return null;
+
 	}
 
-	protected void onPostExecute(Void result) {
+	@Override
+	protected void onPostExecute(String result) {
+		super.onPostExecute(result);
+		String tickerText = "Something went wrong while downloading your song";
+		String contentTile = "Donwloding task completed";
 
-	};
+		if (null != result) {
+			tickerText = "Your song downloaded and available at " + result;
+		}
+
+		Dialogs.showNotification(context, tickerText, contentTile, tickerText,
+				android.R.drawable.arrow_down_float);
+	}
 
 }

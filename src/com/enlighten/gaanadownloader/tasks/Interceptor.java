@@ -3,9 +3,13 @@ package com.enlighten.gaanadownloader.tasks;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
+import android.util.Base64;
 
 import com.enlighten.gaanadownloader.AppLog;
 import com.enlighten.gaanadownloader.Constants;
@@ -14,6 +18,7 @@ import com.enlighten.gaanadownloader.MainActivity;
 import com.stericson.RootTools.RootTools;
 import com.stericson.RootTools.exceptions.RootDeniedException;
 import com.stericson.RootTools.execution.CommandCapture;
+import com.stericson.RootTools.execution.Shell;
 
 public class Interceptor extends AsyncTask<Void, Void, Void> {
 
@@ -70,7 +75,7 @@ public class Interceptor extends AsyncTask<Void, Void, Void> {
 							AppLog.logDebug(TAG, "new line " + line);
 							// start processing lines only if get streaming url
 							// request is hit
-							setGotGetStreamingUriRequest(line);
+
 							if (gotGetStreamingUriRequest) {
 								// it will process line till response is not
 								// completed
@@ -81,18 +86,21 @@ public class Interceptor extends AsyncTask<Void, Void, Void> {
 											"got response of get streaming uri gaana service");
 									AppLog.logDebug(TAG, "response " + line);
 									// got successful response, process response
-									// to get streaming url and stop
-									// intercepting
+									// to get streaming url
+									closeShell();
+									processGetStremUrlResponse(line);
 
 								} else {
 									AppLog.logDebug(TAG,
 											"got unsuccessful response of get streaming uri gaana service");
 									AppLog.logDebug(TAG, "response " + line);
 									// did not get successful response show
-									// alert and stop intercepting
-									stopIntercepting();
+									// alert
+									closeShell();
 								}
 							}
+
+							setGotGetStreamingUriRequest(line);
 
 						}
 
@@ -181,13 +189,10 @@ public class Interceptor extends AsyncTask<Void, Void, Void> {
 			};
 			RootTools.getShell(true).add(killSocat);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (TimeoutException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (RootDeniedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -236,6 +241,41 @@ public class Interceptor extends AsyncTask<Void, Void, Void> {
 			return gotGetStreamingUriRequest;
 		}
 		return false;
+	}
+
+	private void processGetStremUrlResponse(String line) {
+
+		try {
+			JSONObject response = new JSONObject(line);
+
+			String encodedUrl = (String) response.get("data");
+			final String streamUrl = new String(Base64.decode(encodedUrl,
+					Base64.DEFAULT));
+
+			context.runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					((MainActivity) context).streamUrl(streamUrl);
+				}
+			});
+
+		} catch (JSONException e) {
+			AppLog.logDebug(TAG,
+					"Get stream url response is not a valid response");
+			e.printStackTrace();
+
+		}
+
+	}
+
+	private void closeShell() {
+
+		try {
+			Shell.closeRootShell();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

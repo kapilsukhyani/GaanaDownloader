@@ -2,9 +2,13 @@ package com.enlighten.gaanadownloader;
 
 import android.app.Activity;
 import android.app.AlertDialog.Builder;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.drawable.Drawable;
+import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
 import com.stericson.RootTools.RootTools;
@@ -86,4 +90,20 @@ public class Dialogs {
 		builder.create().show();
 	}
 
+	public static void showNotification(Activity context, String tickerText,
+			String contentTile, String contentDescription, int drawaableId) {
+
+		Notification notification;
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(
+				context).setSmallIcon(drawaableId)
+				.setTicker(tickerText).setContentTitle(contentTile)
+				.setContentInfo(contentDescription)
+				.setDefaults(Notification.DEFAULT_ALL).setAutoCancel(true);
+
+		notification = builder.build();
+		((NotificationManager) context
+				.getSystemService(Context.NOTIFICATION_SERVICE)).notify(
+				Constants.STARTED_INTERCEPTING_NOTIFICAITON, notification);
+
+	}
 }
