@@ -112,6 +112,7 @@ public class PrerequisiteChecker extends AsyncTask<Void, Void, Boolean> {
 			}
 
 		} else {
+			Constants.initSocatCommand();
 			socatInstalled = true;
 		}
 

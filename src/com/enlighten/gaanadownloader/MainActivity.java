@@ -28,14 +28,12 @@ public class MainActivity extends Activity implements OnClickListener {
 		startInterceptingButton = (Button) findViewById(R.id.start_intercepting);
 		startInterceptingButton.setOnClickListener(this);
 		prerequisiteChecker = new PrerequisiteChecker(this);
-		interceptor = new Interceptor(this);
+		prerequisiteChecker.execute((Void) null);
 	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
-		prerequisiteChecker.execute((Void) null);
-
 	}
 
 	@Override
@@ -104,6 +102,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	}
 
 	private void executeInterceptingTask() {
+		interceptor = new Interceptor(this);
 		interceptor.execute((Void) null);
 
 	}
