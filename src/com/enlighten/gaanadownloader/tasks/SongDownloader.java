@@ -75,11 +75,11 @@ public class SongDownloader extends AsyncTask<String, Void, String> {
 		try {
 			downloadedFile.createNewFile();
 			fileWriter = new FileOutputStream(downloadedFile);
-			byte[] buffer = new byte[4096];
+			byte[] buffer = new byte[16384];
 
 			int c;
 			while ((c = downloadStream.read(buffer)) != -1) {
-				fileWriter.write(buffer);
+				fileWriter.write(buffer,0,c);
 			}
 
 			return downloadedFile.getAbsolutePath();
