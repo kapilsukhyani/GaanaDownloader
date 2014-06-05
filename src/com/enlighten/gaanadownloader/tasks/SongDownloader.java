@@ -68,7 +68,7 @@ public class SongDownloader extends AsyncTask<String, Void, String> {
 
 		File downloadedFile = new File(storage.getAbsolutePath() + "/"
 				+ Constants.DOWNLOADED_SONG_FILE_NAME + "_"
-				+ (new Date()).toString());
+				+ (new Date()).toString() + Constants.AUDIO_FILE_EXTENSION);
 		if (downloadedFile.exists()) {
 			downloadedFile.delete();
 		}

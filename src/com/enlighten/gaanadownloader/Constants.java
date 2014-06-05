@@ -6,6 +6,7 @@ public class Constants {
 	public static String PATH_SEPARATOR = "/";
 	public static final String BUSYBOX = "busybox";
 	public static final String DOWNLOADED_SONG_FILE_NAME = "downloaded_song";
+	public static final String AUDIO_FILE_EXTENSION = ".3gp";
 	public static final int STARTED_INTERCEPTING_NOTIFICAITON = 0x101;
 	public static final String GAANA_GET_STREAMING_URI_FRAGMENT = "GET /getURLV1.php";
 	public static final String HTTP11 = "HTTP/1.1";
